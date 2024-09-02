@@ -1,0 +1,23 @@
+
+###> symfony/framework-bundle ###
+/.env.local
+/.env.local.php
+/.env.*.local
+/.env
+/config/secrets/prod/prod.decrypt.private.php
+/public/bundles/
+/var/
+/vendor/
+/src/Kernel.php
+/compose.yaml
+/compose.override.yaml
+/.ssh
+/bin
+/config
+/migrations
+/public
+/templates
+/translations
+/composer.lock
+/symfony.lock
+
