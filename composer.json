@@ -18,13 +18,13 @@
   },
   "require": {
     "php": ">=8.2",
-    "symfony/validator": "^6.3",
-    "symfony/messenger": "6.*",
-    "symfony/doctrine-messenger": "6.*",
+    "symfony/validator": "^7.1",
+    "symfony/messenger": "^7.1",
+    "symfony/doctrine-messenger": "^7.1",
     "doctrine/doctrine-bundle": "^2.9",
     "doctrine/orm": "^2.14",
     "symfony/flex": "^2",
-    "symfony/framework-bundle": "6.3.*",
+    "symfony/framework-bundle": "^7.1",
     "ext-readline": "*"
   },
   "config": {
