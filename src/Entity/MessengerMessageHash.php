@@ -19,8 +19,6 @@ use ByteSpin\MessengerDedupeBundle\Repository\MessengerMessageHashRepository;
 
 #[ORM\Entity(repositoryClass: MessengerMessageHashRepository::class)]
 #[Table(name: "messenger_messages_hash")]
-#[ORM\Index(columns: ['hash'])]
-
 class MessengerMessageHash
 {
     #[ORM\Id]
@@ -28,7 +26,7 @@ class MessengerMessageHash
     #[ORM\Column(type: 'bigint')]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, unique: true)]
     private ?string $hash = null;
 
     public function getId(): ?int
