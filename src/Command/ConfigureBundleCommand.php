@@ -20,7 +20,7 @@ use ByteSpin\MessengerDedupeBundle\Scripts\PostInstallScript;
 
 class ConfigureBundleCommand extends Command
 {
-    protected static $defaultName = 'bytespin:configure-messenger-dedupe';
+    protected static string $defaultName = 'bytespin:configure-messenger-dedupe';
 
     protected function configure(): void
     {

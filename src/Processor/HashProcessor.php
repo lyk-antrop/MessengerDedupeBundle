@@ -15,7 +15,7 @@ namespace ByteSpin\MessengerDedupeBundle\Processor;
 
 class HashProcessor
 {
-    public function makeHash($data): string {
+    public function makeHash(string $data): string {
         return hash(
             'sha256',
             $data
