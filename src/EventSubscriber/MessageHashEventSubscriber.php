@@ -17,18 +17,29 @@ use AllowDynamicProperties;
 use ByteSpin\MessengerDedupeBundle\Entity\MessengerMessageHash;
 use ByteSpin\MessengerDedupeBundle\Messenger\Stamp\HashStamp;
 use ByteSpin\MessengerDedupeBundle\Repository\MessengerMessageHashRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
+use RuntimeException;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Messenger\Event\WorkerMessageFailedEvent;
 use Symfony\Component\Messenger\Event\WorkerMessageHandledEvent;
 
-#[AllowDynamicProperties] class MessageHashEventSubscriber implements EventSubscriberInterface
+#[AllowDynamicProperties]
+class MessageHashEventSubscriber implements EventSubscriberInterface
 {
+    private EntityManagerInterface $entityManager;
+
     public function __construct(
         private readonly MessengerMessageHashRepository $hashRepository,
         private readonly ManagerRegistry $managerRegistry,
     ) {
-        $this->entityManager = $this->managerRegistry->getManagerForClass(MessengerMessageHash::class);
+        $entityManager = $this->managerRegistry->getManagerForClass(MessengerMessageHash::class);
+
+        if (!$entityManager instanceof EntityManagerInterface) {
+            throw new RuntimeException('Unexpected EntityManager type');
+        }
+
+        $this->entityManager = $entityManager;
     }
 
     public static function getSubscribedEvents(): array
@@ -51,7 +62,6 @@ use Symfony\Component\Messenger\Event\WorkerMessageHandledEvent;
                 $this->entityManager->flush();
                 $this->entityManager->clear();
             }
-
         }
     }
 }
