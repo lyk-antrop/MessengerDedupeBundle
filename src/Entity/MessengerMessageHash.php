@@ -25,10 +25,10 @@ class MessengerMessageHash
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column]
+    #[ORM\Column(type: 'bigint')]
     private ?int $id = null;
 
-    #[ORM\Column(length: 500)]
+    #[ORM\Column(length: 255)]
     private ?string $hash = null;
 
     public function getId(): ?int
