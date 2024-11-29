@@ -16,7 +16,7 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 class RemoveDedupeHashHandler
 {
     private EntityManagerInterface $entityManager;
-    
+
     public function __construct(
         private readonly MessengerMessageHashRepository $hashRepository,
         private readonly ManagerRegistry $managerRegistry,
@@ -33,11 +33,10 @@ class RemoveDedupeHashHandler
     public function __invoke(RemoveDedupeHash $message): void
     {
         if ($message->hash) {
-            if ($hashData = $this->hashRepository->findOneBy(['hash' =>$message->hash])) {
+            if ($hashData = $this->hashRepository->findOneBy(['hash' => $message->hash])) {
                 // delete message hash from database
                 $this->entityManager->remove($hashData);
                 $this->entityManager->flush();
-                $this->entityManager->clear();
             }
         }
     }

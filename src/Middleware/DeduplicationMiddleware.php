@@ -26,11 +26,11 @@ use Symfony\Component\Messenger\Middleware\MiddlewareInterface;
 use Symfony\Component\Messenger\Middleware\StackInterface;
 use Symfony\Component\Messenger\Stamp\ReceivedStamp;
 
-#[AllowDynamicProperties] 
+#[AllowDynamicProperties]
 class DeduplicationMiddleware implements MiddlewareInterface
 {
     private EntityManagerInterface $entityManager;
-    
+
     public function __construct(
         private readonly MessengerMessageHashRepository $hashRepository,
         private readonly ManagerRegistry $managerRegistry,
@@ -69,9 +69,7 @@ class DeduplicationMiddleware implements MiddlewareInterface
                 $hashData->setHash($hash);
                 $this->entityManager->persist($hashData);
                 $this->entityManager->flush();
-                $this->entityManager->clear();
-            
-            } 
+            }
             // "Hard" check
             catch (UniqueConstraintViolationException) {
                 $this->resetEntityManager();
