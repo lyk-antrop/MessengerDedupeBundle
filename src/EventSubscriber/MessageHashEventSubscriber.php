@@ -57,10 +57,9 @@ class MessageHashEventSubscriber implements EventSubscriberInterface
         if ($hashStamp) {
             $hash = $hashStamp->getHash();
             if ($hashData = $this->hashRepository->findOneBy(['hash' => $hash])) {
-                // delete message hash from database
+                // delete message hash from  database
                 $this->entityManager->remove($hashData);
                 $this->entityManager->flush();
-                $this->entityManager->clear();
             }
         }
     }
