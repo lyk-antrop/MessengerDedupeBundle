@@ -17,6 +17,7 @@ use AllowDynamicProperties;
 use ByteSpin\MessengerDedupeBundle\Entity\MessengerMessageHash;
 use ByteSpin\MessengerDedupeBundle\Messenger\Stamp\HashStamp;
 use ByteSpin\MessengerDedupeBundle\Repository\MessengerMessageHashRepository;
+use DateTimeImmutable;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
@@ -34,6 +35,7 @@ class DeduplicationMiddleware implements MiddlewareInterface
     public function __construct(
         private readonly MessengerMessageHashRepository $hashRepository,
         private readonly ManagerRegistry $managerRegistry,
+        private readonly ?int $ttlSeconds = null,
     ) {
         $entityManager = $this->managerRegistry->getManagerForClass(MessengerMessageHash::class);
 
@@ -59,8 +61,13 @@ class DeduplicationMiddleware implements MiddlewareInterface
             // Ignore the message if a similar hash is found in the database
 
             // "Soft" check
-            if ($this->hashRepository->findOneBy(['hash' => $hash])) {
-                return $envelope;
+            if ($existingHash = $this->hashRepository->findOneBy(['hash' => $hash])) {
+                if (!$this->isExpired($existingHash)) {
+                    return $envelope;
+                }
+                // Stale orphaned hash — delete opportunistically and let this dispatch through
+                $this->entityManager->remove($existingHash);
+                $this->entityManager->flush();
             }
 
             // Save the hash into the database
@@ -78,6 +85,21 @@ class DeduplicationMiddleware implements MiddlewareInterface
             }
         }
         return $stack->next()->handle($envelope, $stack);
+    }
+
+    /**
+     * Returns true when the hash is old enough to be treated as a miss.
+     * Always false when TTL is not configured.
+     */
+    private function isExpired(MessengerMessageHash $hash): bool
+    {
+        if ($this->ttlSeconds === null) {
+            return false;
+        }
+
+        $age = (new DateTimeImmutable())->getTimestamp() - $hash->getCreatedAt()->getTimestamp();
+
+        return $age >= $this->ttlSeconds;
     }
 
     /**

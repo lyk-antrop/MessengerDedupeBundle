@@ -13,6 +13,7 @@
 
 namespace ByteSpin\MessengerDedupeBundle\Repository;
 
+use DateTimeImmutable;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use ByteSpin\MessengerDedupeBundle\Entity\MessengerMessageHash;
@@ -30,5 +31,21 @@ class MessengerMessageHashRepository extends ServiceEntityRepository
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, MessengerMessageHash::class);
+    }
+
+    /**
+     * Bulk-delete all hash rows older than $cutoff.
+     * Uses a single DQL DELETE for efficiency (no hydration).
+     *
+     * @return int Number of rows deleted
+     */
+    public function deleteExpiredBefore(DateTimeImmutable $cutoff): int
+    {
+        return (int) $this->getEntityManager()
+            ->createQuery(
+                'DELETE FROM ' . MessengerMessageHash::class . ' h WHERE h.createdAt < :cutoff'
+            )
+            ->setParameter('cutoff', $cutoff)
+            ->execute();
     }
 }
