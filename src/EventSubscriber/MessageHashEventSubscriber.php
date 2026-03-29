@@ -56,6 +56,17 @@ class MessageHashEventSubscriber implements EventSubscriberInterface
         $hashStamp = $envelope->last(HashStamp::class);
         if ($hashStamp) {
             $hash = $hashStamp->getHash();
+
+            // The message handler may have caused a DB exception that closed the EntityManager
+            // Reset to a fresh EM before in that case
+            if (!$this->entityManager->isOpen()) {
+                $freshEm = $this->managerRegistry->getManagerForClass(MessengerMessageHash::class);
+                if (!$freshEm instanceof EntityManagerInterface) {
+                    return;
+                }
+                $this->entityManager = $freshEm;
+            }
+
             if ($hashData = $this->hashRepository->findOneBy(['hash' => $hash])) {
                 // delete message hash from  database
                 $this->entityManager->remove($hashData);
